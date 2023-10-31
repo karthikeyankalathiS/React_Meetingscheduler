@@ -16,8 +16,8 @@ const Navbar = ({ currentPath }) => {
         <ul className="navbar-nav ml-auto">
           <li className="nav-item">
             <a
-              className={`nav-link ${currentPath === '/home' ? 'active' : ''}`}
-              href="/home"
+              className={`nav-link ${currentPath === '/' ? 'active' : ''}`}
+              href="/"
             >
               Home
             </a>

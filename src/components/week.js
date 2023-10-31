@@ -3,7 +3,7 @@ import Navbar from "./Navbar";
 import axios from "axios";
 import "./style.css";
 
-function Home({ currentPath, openUpdateModal, deleteFunction }) {
+function Week({ currentPath, openUpdateModal, deleteFunction }) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true); 
 
@@ -13,7 +13,7 @@ function Home({ currentPath, openUpdateModal, deleteFunction }) {
 
     async function fetchAllData() {
         try {
-            const response = await axios.get('http://127.0.0.1:3112/home');
+            const response = await axios.get('http://127.0.0.1:3112/week');
             const datas = response.data.data;
             console.log(datas);
             setData(datas);
@@ -29,7 +29,7 @@ function Home({ currentPath, openUpdateModal, deleteFunction }) {
             <Navbar />
             <div className="container mt-5">
                 <h5 className="heading text-center text-white">MEETING <span style={{ color: "#0DF1DB" }}> DASHBOARD</span></h5>
-                <div className="btn-group mb-3 ml">
+                <div className="btn-group mb-3">
                     <a href="/today" className={`btn btn-secondary${currentPath === '/today' ? ' active' : ''}`}>Today</a>
                     <a href="/week" className={`btn btn-secondary${currentPath === '/week' ? ' active' : ''}`}>Weekly</a>
                     <a href="/month" className={`btn btn-secondary${currentPath === '/month' ? ' active' : ''}`}>Monthly</a>
@@ -91,4 +91,4 @@ function Home({ currentPath, openUpdateModal, deleteFunction }) {
     );
 }
 
-export default Home;
+export default Week;
