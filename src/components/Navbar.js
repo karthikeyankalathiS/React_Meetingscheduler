@@ -35,20 +35,3 @@ const Navbar = () => {
 export default Navbar;
 
 
-{/* <li className="nav-item">
-<a
-  className={`nav-link ${currentPath === '/' ? 'active' : ''}`}
-  href="/"
->
-  Home
-</a>
-</li>
-<li className="nav-item">
-<a
-  className={`nav-link ${currentPath === '/booking' ? 'active' : ''}`}
-  href="/booking"
->
-  Book
-</a>
-</li> */}
-
