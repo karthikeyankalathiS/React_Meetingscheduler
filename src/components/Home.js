@@ -2,18 +2,20 @@ import React, { useEffect, useState } from "react";
 import Navbar from "./Navbar";
 import axios from "axios";
 import "./style.css";
+import { useLocation } from 'react-router-dom';
 
-function Home({ currentPath, openUpdateModal }) {
+function Home({  openUpdateModal }) {
     const itemsPerPage = 10;
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
 
-    useEffect(() => {
-        fetchAllData(currentPath);
-    }, [currentPath]);
+    const { pathname } = useLocation();
 
-    
+    useEffect(() => {
+        fetchAllData('/home');
+    }, []);
+
 
     async function fetchAllData(path) {
         try {
@@ -22,6 +24,7 @@ function Home({ currentPath, openUpdateModal }) {
             console.log(datas);
             setData(datas);
             setLoading(false);
+            setCurrentPage(1);
         } catch (error) {
             console.error('Error fetching data:', error);
             setLoading(false);
@@ -58,15 +61,19 @@ function Home({ currentPath, openUpdateModal }) {
             <div className="container mt-5">
                 <h5 className="heading text-center text-white">MEETING <span style={{ color: "#0DF1DB" }}> DASHBOARD</span></h5>
                 <div className="btn-group mb-3">
-                    <button className={`btn btn-secondary${currentPath === '/today' ? ' active' : ''}`} onClick={() => fetchAllData('/today')}>
+                    <button className={`btn btn-secondary ${pathname === '/home' ? 'active' : ''}`} onClick={() => fetchAllData('/home')}>
+                        All
+                    </button>
+                    <button className={`btn btn-secondary ${pathname === '/today' ? 'active' : ''}`} onClick={() => fetchAllData('/today')}>
                         Today
                     </button>
-                    <button className={`btn btn-secondary${currentPath === '/week' ? ' active' : ''}`} onClick={() => fetchAllData('/week')}>
+                    <button className={`btn btn-secondary ${pathname === '/week' ? 'active' : ''}`} onClick={() => fetchAllData('/week')}>
                         Weekly
                     </button>
-                    <button className={`btn btn-secondary${currentPath === '/month' ? ' active' : ''}`} onClick={() => fetchAllData('/month')}>
+                    <button className={`btn btn-secondary ${pathname === '/month' ? 'active' : ''}`} onClick={() => fetchAllData('/month')}>
                         Monthly
                     </button>
+
                 </div>
 
                 {loading ? (
@@ -94,29 +101,18 @@ function Home({ currentPath, openUpdateModal }) {
                                             <td>{new Date(item.startTime).toLocaleString()}</td>
                                             <td>{new Date(item.endTime).toLocaleString()}</td>
                                             <td>
+                                                <div className="btn">
                                                 {new Date(item.startTime) > new Date() && (
-                                                    <button
-                                                        className="btn btn-primary"
-                                                        type="button"
-                                                        data-toggle="modal"
-
-                                                        onClick={() => openUpdateModal(item.meetingId)}
-                                                    >
-                                                        Update
-                                                    </button>
+                                                    <button className="btn btn-primary" type="button" data-toggle="modal" onClick={() => openUpdateModal(item.meetingId)}>Update</button>
                                                 )}
-                                                <button
-                                                    className="btn btn-danger"
-                                                    onClick={() => deleteFunction(item.meetingId)}
-                                                >
-                                                    Delete
-                                                </button>
+                                                <button className="btn btn-danger" onClick={() => deleteFunction(item.meetingId)}> Delete </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="6">No records found</td>
+                                        <td colSpan="6" style={{ textAlign: "center" }}>No records found</td>
                                     </tr>
                                 )}
                             </tbody>
@@ -126,7 +122,7 @@ function Home({ currentPath, openUpdateModal }) {
                                 onClick={() => setCurrentPage(currentPage - 1)}
                                 disabled={currentPage === 1}
                             >
-                                Previous
+                                Prev
                             </button>
                             <span style={{ color: "white" }}>Page {currentPage}</span>
                             <button className="btn btn-primary"
