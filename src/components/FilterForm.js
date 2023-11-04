@@ -12,9 +12,9 @@ const FilterForm = ({ applyFilter, setShowFilterWindow }) => {
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
             applyFilter(startDate, endDate);
-        } else if (searchType === 'employeeid') {
+        } else if (searchType === 'employeeId') {
             applyFilter(employeeValue);
-        } else if (searchType === 'roomid') {
+        } else if (searchType === 'roomId') {
             applyFilter(roomIDValue);
         }
     };
@@ -31,7 +31,7 @@ const FilterForm = ({ applyFilter, setShowFilterWindow }) => {
                 >
                     <option value="date">Date</option>
                     <option value="employeeid">Employee ID</option>
-                    <option value="roomid">Room ID</option>
+                    <option value="roomId">Room ID</option>
                 </select>
             </div>
             {searchType === 'date' ? (
@@ -55,7 +55,7 @@ const FilterForm = ({ applyFilter, setShowFilterWindow }) => {
                         />
                     </div>
                 </>
-            ) : searchType === 'employeeid' ? (
+            ) : searchType === 'employeeId' ? (
                 <div className="form-group">
                     <label htmlFor="employeeId">Employee ID</label>
                     <input
