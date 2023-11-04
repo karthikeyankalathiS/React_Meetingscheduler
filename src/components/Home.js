@@ -7,6 +7,7 @@ import { fetchRooms, fetchEmployees } from "../Service/api";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useLocation } from "react-router-dom";
+import FilterForm from "./FilterForm";
 
 function Home() {
     const itemsPerPage = 10;
@@ -21,6 +22,8 @@ function Home() {
     const [updateEndTime, setUpdateEndTime] = useState("");
     const [updateEmployeeId, setUpdateEmployeeId] = useState("");
     const [updateError, setUpdateError] = useState("");
+    const [showFilterWindow, setShowFilterWindow] = useState(false);
+    
 
     const fetchAllData = async (path) => {
         try {
@@ -99,6 +102,20 @@ function Home() {
         }
     };
 
+    const toggleFilterWindow = () => {
+        setShowFilterWindow(!showFilterWindow);
+    };
+    const applyFilter = (startDate, endDate, employeeId) => {
+        if (startDate && endDate) {
+            console.log('Selected start date:', startDate);
+            console.log('Selected end date:', endDate);
+        } else if (employeeId) {
+            console.log('Selected end employeeid:',employeeId);
+        }
+    };
+  
+    
+
     const location = useLocation();
     useEffect(() => {
 
@@ -130,20 +147,49 @@ function Home() {
             <div className="container mt-5">
                 <h5 className="heading text-center text-white">MEETING <span style={{ color: "#0DF1DB" }}> DASHBOARD</span></h5>
                 <div className="btn-group mb-3">
-                    <button className={`btn btn-secondary ${activePath === '/home' ? 'active' : ''}`} onClick={() => fetchAllData('/home')}>
-                        All
-                    </button>
-                    <button className={`btn btn-secondary ${activePath === '/today' ? 'active' : ''}`} onClick={() => fetchAllData('/today')}>
-                        Today
-                    </button>
-                    <button className={`btn btn-secondary ${activePath === '/week' ? 'active' : ''}`} onClick={() => fetchAllData('/week')}>
-                        Weekly
-                    </button>
-                    <button className={`btn btn-secondary ${activePath === '/month' ? 'active' : ''}`} onClick={() => fetchAllData('/month')}>
-                        Monthly
-                    </button>
-
+                    <button
+                        className="fas fa-filter"
+                        style={{
+                            fontSize: "24px",
+                            color: "rgb(13, 241, 219)",
+                            border: "none",
+                            background: "transparent",
+                        }}
+                        onClick={toggleFilterWindow}
+                    ></button>
                 </div>
+
+                <div className={`filter-window ${showFilterWindow ? 'open' : ''}`}>
+                    <button
+                        type="button"
+                        className="btn-close-home"
+                        data-dismiss="modal"
+                        aria-label="Close"
+                        style={{ color: "white" }}
+                        onClick={() => {
+                            setShowFilterWindow(false);
+                        }}
+
+                    >
+                        X
+                    </button>
+                    <div className="btn-group mb-3">
+                        <button className={`btn btn-secondary ${activePath === '/home' ? 'active' : ''}`} onClick={() => { fetchAllData('/home'); setShowFilterWindow(false) }}>
+                            All
+                        </button>
+                        <button className={`btn btn-secondary ${activePath === '/today' ? 'active' : ''}`} onClick={() => { fetchAllData('/today'); setShowFilterWindow(false) }}>
+                            Today
+                        </button>
+                        <button className={`btn btn-secondary ${activePath === '/week' ? 'active' : ''}`} onClick={() => { fetchAllData('/week'); setShowFilterWindow(false) }}>
+                            Weekly
+                        </button>
+                        <button className={`btn btn-secondary ${activePath === '/month' ? 'active' : ''}`} onClick={() => { fetchAllData('/month'); setShowFilterWindow(false) }}>
+                            Monthly
+                        </button>
+                    </div>
+                <FilterForm applyFilter={applyFilter} setShowFilterWindow={setShowFilterWindow} />
+                </div>
+
 
                 {loading ? (
                     <p>Loading...</p>

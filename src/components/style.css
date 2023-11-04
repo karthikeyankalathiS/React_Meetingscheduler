@@ -9,6 +9,9 @@
     border:  1px solid #0DF1DB !important;
     text-decoration: none;
 }
+label{
+  color: white;
+}
 
 .btn.btn-close{
   font-family: var(--framer-font-family, Inter, Inter Placeholder, sans-serif);
@@ -31,6 +34,9 @@ body{
 }
 .container.mt-5{
     background-color: #10161C;
+}
+.mt-5, .my-5 {
+  margin-top: 1rem!important;
 }
 img{
     width: 330px;
@@ -182,7 +188,37 @@ button.btn-close {
     border: 1px solid #ccc;
     border-radius: 5px;
   }
- 
+
+/* flip */
+
+.filter-window {
+  position: fixed;
+  top: 0;
+  left: -300px; 
+  width: 300px;
+  height: 100%;
+  background-color: #10161c;
+  transition: left 0.3s ease-in-out;
+  z-index: 1;
+  padding: 20px;
+}
+
+.filter-window.open {
+  left: 0; 
+}
+
+button.btn-close-home {
+  font-family: cursive;
+  background: transparent;
+  color: white;
+  border: none;
+  margin-left: 95%;
+  /* padding-top: 5px; */
+  padding-bottom: 10px;
+
+}
+
+
 /* input */
 .row {
   --bs-gutter-x: 0.15rem;
