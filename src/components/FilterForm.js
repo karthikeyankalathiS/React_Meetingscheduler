@@ -3,7 +3,8 @@ import './style.css';
 
 const FilterForm = ({ applyFilter, setShowFilterWindow }) => {
     const [searchType, setSearchType] = useState('date');
-    const [searchValue, setSearchValue] = useState('');
+    const [employeeValue, setemployeeValue] = useState('');
+    const [roomIDValue, setRoomIDValue] = useState('');
 
     const handleFilterSubmit = (e) => {
         e.preventDefault();
@@ -11,9 +12,10 @@ const FilterForm = ({ applyFilter, setShowFilterWindow }) => {
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
             applyFilter(startDate, endDate);
-        } else {
-            // Handle employee ID search
-            applyFilter(searchValue);
+        } else if (searchType === 'employeeid') {
+            applyFilter(employeeValue);
+        } else if (searchType === 'roomid') {
+            applyFilter(roomIDValue);
         }
     };
 
@@ -28,7 +30,8 @@ const FilterForm = ({ applyFilter, setShowFilterWindow }) => {
                     onChange={(e) => setSearchType(e.target.value)}
                 >
                     <option value="date">Date</option>
-                    <option value="employee">Employee ID</option>
+                    <option value="employeeid">Employee ID</option>
+                    <option value="roomid">Room ID</option>
                 </select>
             </div>
             {searchType === 'date' ? (
@@ -52,7 +55,7 @@ const FilterForm = ({ applyFilter, setShowFilterWindow }) => {
                         />
                     </div>
                 </>
-            ) : (
+            ) : searchType === 'employeeid' ? (
                 <div className="form-group">
                     <label htmlFor="employeeId">Employee ID</label>
                     <input
@@ -60,8 +63,21 @@ const FilterForm = ({ applyFilter, setShowFilterWindow }) => {
                         className="form-control"
                         id="employeeId"
                         placeholder="Enter employee ID"
-                        value={searchValue}
-                        onChange={(e) => setSearchValue(e.target.value)}
+                        value={employeeValue}
+                        onChange={(e) => setemployeeValue(e.target.value)}
+                    />
+                </div>
+            ) : (
+                // Room ID Search
+                <div className="form-group">
+                    <label htmlFor="roomID">Room ID</label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        id="roomID"
+                        placeholder="Enter Room ID"
+                        value={roomIDValue}
+                        onChange={(e) => setRoomIDValue(e.target.value)}
                     />
                 </div>
             )}
