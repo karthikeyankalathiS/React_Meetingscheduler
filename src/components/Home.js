@@ -23,7 +23,7 @@ function Home() {
     const [updateEmployeeId, setUpdateEmployeeId] = useState("");
     const [updateError, setUpdateError] = useState("");
     const [showFilterWindow, setShowFilterWindow] = useState(false);
-    
+
 
     const fetchAllData = async (path) => {
         try {
@@ -105,15 +105,20 @@ function Home() {
     const toggleFilterWindow = () => {
         setShowFilterWindow(!showFilterWindow);
     };
-    const applyFilter = (startDate, endDate, employeeId) => {
-        if (startDate && endDate) {
-            console.log('Selected start date:', startDate);
-            console.log('Selected end date:', endDate);
-        } else if (employeeId) {
-            console.log('Selected end employeeid:',employeeId);
+
+    const applyFilter = (filteredData) => {
+        try {
+            const datas = filteredData.data;
+            console.log(datas);
+            setData(datas);
+            setLoading(false);
+            setCurrentPage(1);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            setLoading(false);
         }
     };
-  
+      
     
 
     const location = useLocation();
