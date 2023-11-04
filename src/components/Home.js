@@ -2,22 +2,27 @@ import React, { useEffect, useState } from "react";
 import Navbar from "./Navbar";
 import axios from "axios";
 import "./style.css";
-import { useLocation } from 'react-router-dom';
+import Update from "./Update";
+import { fetchRooms, fetchEmployees } from "../Service/api";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useLocation } from "react-router-dom";
 
-function Home({  openUpdateModal }) {
+function Home() {
     const itemsPerPage = 10;
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
+    const [showModal, setShowModal] = useState(false);
+    const [selectedMeetingId, setSelectedMeetingId] = useState(null);
+    const [activePath, setActivePath] = useState('/home');
+    const [updateRoomId, setUpdateRoomId] = useState("");
+    const [updateStartTime, setUpdateStartTime] = useState("");
+    const [updateEndTime, setUpdateEndTime] = useState("");
+    const [updateEmployeeId, setUpdateEmployeeId] = useState("");
+    const [updateError, setUpdateError] = useState("");
 
-    const { pathname } = useLocation();
-
-    useEffect(() => {
-        fetchAllData('/home');
-    }, []);
-
-
-    async function fetchAllData(path) {
+    const fetchAllData = async (path) => {
         try {
             const response = await axios.get(`http://127.0.0.1:3112${path}`);
             const datas = response.data.data;
@@ -25,31 +30,94 @@ function Home({  openUpdateModal }) {
             setData(datas);
             setLoading(false);
             setCurrentPage(1);
+            setActivePath(path);
         } catch (error) {
             console.error('Error fetching data:', error);
             setLoading(false);
         }
     }
 
-    function deleteFunction(meetingId) {
-        if (window.confirm("Are you sure you want to delete this entry?")) {
-            fetch(`http://127.0.0.1:3112/delete/${meetingId}`, {
-                method: 'DELETE',
-            })
-                .then((response) => {
-                    if (response.ok) {
-                        alert("Booking deleted successfully");
-                        window.location.reload();
-                    } else {
-                        alert("Failed to delete booking");
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error deleting booking:", error);
-                    alert("Internal Server Error");
-                });
+    async function getMeetingById(meetingId) {
+        try {
+            const response = await axios.get(`http://127.0.0.1:3112/getMeeting/${meetingId}`);
+            if (response.status === 200) {
+                const data = response.data;
+                console.log('In Function getMeetingById : ', data);
+                return data;
+            } else {
+                console.error('Failed to fetch meeting with status code: ', response.status);
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching meeting: ', error);
+            return null;
         }
     }
+
+
+    let currentMeetingId = null;
+    const updateButtonClick = async (meetingId) => {
+        currentMeetingId = meetingId;
+        const meeting = await getMeetingById(meetingId);
+        await fetchRooms();
+        await fetchEmployees();
+        setUpdateEmployeeId(meeting.data.employeeId)
+        setUpdateRoomId(meeting.data.roomId)
+        setUpdateStartTime(meeting.data.startTime)
+        setUpdateEndTime(meeting.data.endTime)
+        console.log(meeting.data._id)
+
+        setSelectedMeetingId(meetingId);
+        setShowModal(true);
+    };
+
+    const deleteFunction = async (meetingId) => {
+        if (window.confirm("Are you sure you want to delete this entry?")) {
+            try {
+                const response = await axios.delete(
+                    `http://127.0.0.1:3112/delete/${meetingId}`
+                );
+
+                if (response.status === 200) {
+                    toast.success('Deleted successfully', {
+                        position: "top-center",
+                        autoClose: 1000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                    });
+                    await fetchAllData(activePath);
+                } else {
+                    alert("Failed to delete booking");
+                }
+            } catch (error) {
+                console.error("Error deleting booking:", error);
+                alert("Internal Server Error");
+            }
+        }
+    };
+
+    const location = useLocation();
+    useEffect(() => {
+
+        fetchAllData("/home");
+        if (location.state && location.state.message) {
+            toast[location.state.type](location.state.message, {
+                position: "top-center",
+                autoClose: 1000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+            location.state = {};
+        }
+    }, [location]);
+
+
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -58,19 +126,20 @@ function Home({  openUpdateModal }) {
     return (
         <div className="App">
             <Navbar />
+            <ToastContainer />
             <div className="container mt-5">
                 <h5 className="heading text-center text-white">MEETING <span style={{ color: "#0DF1DB" }}> DASHBOARD</span></h5>
                 <div className="btn-group mb-3">
-                    <button className={`btn btn-secondary ${pathname === '/home' ? 'active' : ''}`} onClick={() => fetchAllData('/home')}>
+                    <button className={`btn btn-secondary ${activePath === '/home' ? 'active' : ''}`} onClick={() => fetchAllData('/home')}>
                         All
                     </button>
-                    <button className={`btn btn-secondary ${pathname === '/today' ? 'active' : ''}`} onClick={() => fetchAllData('/today')}>
+                    <button className={`btn btn-secondary ${activePath === '/today' ? 'active' : ''}`} onClick={() => fetchAllData('/today')}>
                         Today
                     </button>
-                    <button className={`btn btn-secondary ${pathname === '/week' ? 'active' : ''}`} onClick={() => fetchAllData('/week')}>
+                    <button className={`btn btn-secondary ${activePath === '/week' ? 'active' : ''}`} onClick={() => fetchAllData('/week')}>
                         Weekly
                     </button>
-                    <button className={`btn btn-secondary ${pathname === '/month' ? 'active' : ''}`} onClick={() => fetchAllData('/month')}>
+                    <button className={`btn btn-secondary ${activePath === '/month' ? 'active' : ''}`} onClick={() => fetchAllData('/month')}>
                         Monthly
                     </button>
 
@@ -88,24 +157,24 @@ function Home({  openUpdateModal }) {
                                     <th>Organizer Name</th>
                                     <th>Start Time</th>
                                     <th>End Time</th>
-                                    <th>Actions</th>
+                                    <th id="action">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {itemsOnCurrentPage.length > 0 ? (
                                     itemsOnCurrentPage.map((item, index) => (
                                         <tr key={item.meetingId}>
-                                            <td>{index + 1}</td>
+                                            <td>{index + 1 + (currentPage - 1) * itemsPerPage}</td>
                                             <td>{item.roomName}</td>
                                             <td>{item.employeeName}</td>
                                             <td>{new Date(item.startTime).toLocaleString()}</td>
                                             <td>{new Date(item.endTime).toLocaleString()}</td>
                                             <td>
                                                 <div className="btn">
-                                                {new Date(item.startTime) > new Date() && (
-                                                    <button className="btn btn-primary" type="button" data-toggle="modal" onClick={() => openUpdateModal(item.meetingId)}>Update</button>
-                                                )}
-                                                <button className="btn btn-danger" onClick={() => deleteFunction(item.meetingId)}> Delete </button>
+                                                    {new Date(item.startTime) > new Date() && (
+                                                        <button className="fa fa-edit" style={{ fontSize: "24px", color: "white", border: "none", background: "transparent" }} type="button" data-toggle="modal" onClick={() => updateButtonClick(item.meetingId)}></button>
+                                                    )}
+                                                    <button class="fa fa-trash" style={{ fontSize: "24px", color: "red", border: "none", background: "transparent" }} onClick={() => deleteFunction(item.meetingId)}>  </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -118,25 +187,45 @@ function Home({  openUpdateModal }) {
                             </tbody>
                         </table>
                         <div className="pagination-controls">
-                            <button className="btn btn-primary"
+                            <button className="fa fa-angle-double-left" style={{ fontSize: "24px", color: "rgb(13, 241, 219)", border: "none", background: "transparent" }}
                                 onClick={() => setCurrentPage(currentPage - 1)}
-                                disabled={currentPage === 1}
+                                hidden={currentPage === 1}
                             >
-                                Prev
                             </button>
                             <span style={{ color: "white" }}>Page {currentPage}</span>
-                            <button className="btn btn-primary"
+                            <button className="fa fa-angle-double-right" style={{ fontSize: "24px", color: "rgb(13, 241, 219)", border: "none", background: "transparent" }}
                                 onClick={() => setCurrentPage(currentPage + 1)}
-                                disabled={itemsOnCurrentPage.length < itemsPerPage}
+                                hidden={itemsOnCurrentPage.length < itemsPerPage}
                             >
-                                Next
                             </button>
                         </div>
                     </div>
                 )}
             </div>
+            {showModal && <Update showModal={showModal} setShowModal={setShowModal} fetchAllData={fetchAllData} selectedMeetingId={selectedMeetingId} activePath={activePath} updateRoomId={updateRoomId} updateStartTime={updateStartTime}
+                updateEndTime={updateEndTime} updateEmployeeId={updateEmployeeId} updateError={updateError} setUpdateEmployeeId={setUpdateEmployeeId} setUpdateRoomId={setUpdateRoomId} setUpdateStartTime={setUpdateStartTime} setUpdateEndTime={setUpdateEndTime} setUpdateError={setUpdateError} />}
         </div>
+
     );
+
 }
 
+
 export default Home;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

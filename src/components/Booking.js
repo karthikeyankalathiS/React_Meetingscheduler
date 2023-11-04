@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import Navbar from "./Navbar";
+import { setMinDateTime } from "../Service/utils";
+import { fetchRooms, fetchEmployees, insertBooking } from "../Service/api";
+import { validateDateTime } from "../Service/Validations";
+import { useNavigate } from "react-router-dom";
+ 
 import "./style.css";
-
+ 
 const Booking = () => {
   const [rooms, setRooms] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -11,91 +15,34 @@ const Booking = () => {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [error, setError] = useState("");
-
+  const navigate = useNavigate();
+ 
   useEffect(() => {
-    setMinDateTime();
-    fetchRooms();
-    fetchEmployees();
+    setMinDateTime(setStartTime, setEndTime);
+    fetchRooms(setRooms);
+    fetchEmployees(setEmployees);
   }, []);
-
-  const setMinDateTime = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-    const hour = String(now.getHours()).padStart(2, "0");
-    const minute = String(now.getMinutes()).padStart(2, "0");
-    const dateTime = `${year}-${month}-${day}T${hour}:${minute}`;
-    setStartTime(dateTime);
-    setEndTime(dateTime);
-  };
-
-  const fetchRooms = async () => {
-    try {
-      const response = await axios.get("http://127.0.0.1:3112/getRooms");
-      const sortedRooms = response.data.sort((a, b) =>
-        a.room.localeCompare(b.room)
-      );
-      setRooms(sortedRooms);
-    } catch (error) {
-      console.error("Error fetching rooms:", error);
-    }
-  };
-
-  const fetchEmployees = async () => {
-    try {
-      const response = await axios.get("http://127.0.0.1:3112/getEmployees");
-      const sortedEmployees = response.data.sort((a, b) => {
-        const idA = a.employeeId;
-        const idB = b.employeeId;
-        const numA = parseInt(idA.match(/\d+/)[0]);
-        const numB = parseInt(idB.match(/\d+/)[0]);
-        return numA - numB || idA.localeCompare(idB);
-      });
-      setEmployees(sortedEmployees);
-    } catch (error) {
-      console.error("Error fetching employees:", error);
-    }
-  };
-
+ 
   const clearFunction = async () => {
-    await fetchRooms();
-    await fetchEmployees();
+    await fetchRooms(setRooms);
+    await fetchEmployees(setEmployees);
     setRoomId("");
     setEmployeeId("");
     setError("");
   };
-
-  const validateDateTime = () => {
-    const start = new Date(startTime);
-    const end = new Date(endTime);
-    if (end <= start) {
-      setError("End time should be after start time.");
-      return false;
-    }
-    const diffInHours = (end - start) / (1000 * 60 * 60);
-    if (diffInHours > 30) {
-      setError("Meeting can't be more than 30 hours.");
-      return false;
-    }
-    return true;
-  };
-
+ 
   const insertFunction = async () => {
-    if (!validateDateTime()) return;
-    if (!roomId || !employeeId || !startTime || !endTime) {
-      setError("All fields are required");
-      return;
-    }
+    if (!validateDateTime(startTime, endTime, setError)) return;
+ 
     const formData = { roomId, startTime, endTime, employeeId };
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:3112/insertBooking",
-        formData
-      );
+      const response = await insertBooking(formData);
       if (response.status === 200) {
         await clearFunction();
-        window.location.href = "http://localhost:3000";
+        navigate('/', {
+          state: { message: 'Booking added successfully', type: 'success' }
+        });
+       
       }
     } catch (error) {
       if (error.response && error.response.status === 400) {
@@ -105,7 +52,7 @@ const Booking = () => {
       }
     }
   };
-
+ 
   return (
     <div
       className="align-items-center justify-content-center"
@@ -199,7 +146,7 @@ const Booking = () => {
                   <div className="col">
                     <button
                       type="button"
-                      className="btn btn-primary w-100"
+                      className="btn btn-primary w-100 d-flex justify-content-center"
                       onClick={insertFunction}
                     >
                       Insert
@@ -208,7 +155,7 @@ const Booking = () => {
                   <div className="col">
                     <button
                       type="button"
-                      className="btn btn-primary w-100"
+                      className="btn btn-primary w-100 d-flex justify-content-center"
                       onClick={clearFunction}
                     >
                       Clear
@@ -223,5 +170,5 @@ const Booking = () => {
     </div>
   );
 };
-
+ 
 export default Booking;
